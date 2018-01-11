@@ -1,0 +1,231 @@
+<head>
+        <style>
+            /* css for the calc. copy and paste in to website <head> or add to css file */
+            .calc-container {
+                max-width: 700px;
+                margin: auto;
+                padding: 20px;
+                background: pink; /* todo: remove. */
+            }
+
+            .calc-container label{
+                width: 300px;
+                display: inline-block;
+            }
+
+            .calc-container input, .currency-input {
+                max-width: 395px; /* can probably be much smaller */
+                width: 100%;
+                display: inline-block;
+                box-sizing: border-box;
+            }
+
+            /* make the $ look like its in the input */
+            .currency-input {
+                border: 1px inset #ccc;
+                background: white;
+            }
+            .currency-input input {
+                border: 0;
+                max-width: 300px;
+            }
+        </style>
+        <!-- copy/paste in to <head> -->
+        <script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+
+        <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+        <script type="text/javascript">
+        (function(){
+            emailjs.init("user_QPcUwW4xpDdFbFyrAuGj7");
+        })();
+        </script>
+        <!-- End copy/paste -->
+</head>
+<body>
+    <h1>Simple calculator project for Mason</h1>
+
+    <!-- start of calculator -->
+    <div class="calc-container">
+        <div>
+            <div class="calc-section">
+                <div>
+                    <label for="months">Enter a time frame in months</label>
+                    <input id="months" name="months" type="number" min="0" step="1" value="12"/>
+                </div>
+               <div>
+                    <label for="hires">Number of hires in that timeframe</label>
+                    <input id="hires" name="hires" type="number" min="0" step="1" value="30"/>
+                </div>
+            </div>
+            <div class="calc-section">
+                <h4>Recruiting Costs</h4>
+                <div>
+                    <label for="salaries">Recruiter annual salaries</label>
+                    <span class=currency-input>
+                        $<input class="cost annual" id="salaries" name="salaries" type="number" min="0.01" step="0.01"/>
+                    </span>
+
+                    <label for="bonuses">Employee referral bonuses during timeframe</label>
+                    <span class=currency-input>
+                        $<input class="cost timeframe" id="bonuses" name="bonuses" type="number" min="0.01" step="0.01"/>
+                    </span>
+
+                    <label>Interview Costs during timeframe</label>
+                    <div class="calc-subsection">
+                        <label for="costs-hours">Number of hours</label>
+                        <input class="sub-cost" id="costs-hours" name="costs-hours" min="0" step="1" type="number"/>
+
+                        <label for="costs-interviewers">Average number of interviewers</label>
+                        <input class="sub-cost" id="costs-interviewers" name="costs-interviewers" min="0" step="1" type="number"/>
+
+                        <label for="costs-avg-hourly">Average hourly interviewer salaries 
+                            <div class="help-text">Tip: divide estimated annual salary by 2000.</div>
+                        </label>
+                        <span class=currency-input>
+                            $<input class="sub-cost" id="costs-avg-hourly" name="costs-avg-hourly" type="number" min="0.01" step="0.01"/> 
+                        </span>
+                
+                        <div>Total interview costs: $<span id="total-interview"> </span></div>
+                    </div>
+
+                    <label for="yearly-ad">Yearly advertising costs 
+                            <div class="help-text">e.g. job boards and paid postings</div>
+                    </label>
+                    <span class=currency-input>
+                        $<input class="cost annual" id="yearly-ad" name="yearly-ad" type="number" min="0.01" step="0.01"/>
+                    </span>
+                    <label for="yearly-tech">Yearly technology costs 
+                            <div class="help-text">e.g. ATS, Linkedin, CareerBuilder, Dice, etc.</div>
+                    </label>
+                    <span class=currency-input>
+                        $<input class="cost annual" id="yearly-text" name="yearly-text" type="number" min="0.01" step="0.01"/>
+                    </span>
+                    <label for="yearly-fair">Yearly career fair costs</label>
+                    <span class=currency-input>
+                        $<input class="cost annual" id="yearly-fair" name="yearly-fair" type="number" min="0.01" step="0.01"/>
+                    </span>
+                </div>
+            </div>
+            <div class="calc-section">
+                <h4>Candidate Costs</h4>
+                <div>
+                        <label for="travel">Travel costs during timeframe</label>
+                        <span class=currency-input>
+                            $<input class="cost timeframe" id="travel" name="travel" type="number" min="0.01" step="0.01"/>
+                        </span>
+                        <label for="relocation">Relocation costs during timeframe</label>
+                        <span class=currency-input>
+                            $<input class="cost timeframe" id="relocation" name="relocation" type="number" min="0.01" step="0.01"/>
+                        </span>
+                        <label for="signing">Signing bonuses during timeframe</label>
+                        <span class=currency-input>
+                            $<input class="cost timeframe" id="signing" name="signing" type="number" min="0.01" step="0.01"/>
+                        </span>
+                </div>
+            </div>
+            <div class="calc-section">
+                <div class="total">Total Annual Recruiting Cost: $<span id="total"></span></div>
+                <div class="total">Recruiting Cost Per Hire: $<span id="total-per-hire"></span></div>
+            </div>
+
+            <div class="calc-section">
+                <div class="error" id="email-results-error"></div>
+                <div class="success" id="email-results-success"></div>
+                <input id="send-results-email" name="email" type="email"/>
+                <button id="send-results">Send me my results</button>
+            </div>
+        </div>
+    </div>
+    <!-- end calculator -->
+
+    <!-- logic for calc, place at end of <body> -->
+    <script>
+        // Calc logic.
+        var totalInterview = 0;
+        var costPerHire = 0;
+        var total;
+
+        $(".calc-container input").on("change",function(e){
+            if($(e.target).hasClass('sub-cost')) {
+                // Interview costs sub-total #costs-hours * #costs-interviewers * #costs-avg-hourly
+                totalInterview = 0;
+                $(".sub-cost").each(function(index, element){
+                    var val = parseFloat($(element).val());
+                    if($.isNumeric(val)) {
+                        if(totalInterview === 0) {
+                            totalInterview = val;
+                        } else {
+                            totalInterview = totalInterview * val;
+                        }
+                    }
+                });
+                $("#total-interview").html(totalInterview);
+            }
+            // add up everything
+            total = 0;
+            $(".cost").each(function(index, element){
+                var val = parseFloat($(element).val());
+                if($.isNumeric(val)) {
+                    total += val;
+                }
+            });
+            total += totalInterview;
+            $("#total").html(total);
+
+
+            //cost per hire
+            var annual = 0
+            var months = parseInt($("#months").val());
+            $(".annual").each(function(i, e) {
+                var val = parseFloat($(e).val());
+                if($.isNumeric(val)) {
+                    annual += val;
+                }
+            });
+            var timeframe = 0;
+            $(".timeframe").each(function(i, e) {
+                var val = parseFloat($(e).val());
+                if($.isNumeric(val)) {
+                    timeframe += val;
+                }
+            });
+            var numHires = parseInt($("#hires").val());
+            numHires = $.isNumeric(numHires) ? numHires : 0;
+            costPerHire = ((annual/ 12 * months) + timeframe) / numHires;
+            $("#total-per-hire").html(costPerHire);
+        });
+        
+        //Stole this from stack overflow, should work
+        function isValidEmailAddress(emailAddress) {
+            var pattern = /^([a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+(\.[a-z\d!#$%&'*+\-\/=?^_`{|}~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)*|"((([ \t]*\r\n)?[ \t]+)?([\x01-\x08\x0b\x0c\x0e-\x1f\x7f\x21\x23-\x5b\x5d-\x7e\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|\\[\x01-\x09\x0b\x0c\x0d-\x7f\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))*(([ \t]*\r\n)?[ \t]+)?")@(([a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\d\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.)+([a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]|[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF][a-z\d\-._~\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]*[a-z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])\.?$/i;
+            return pattern.test(emailAddress);
+        }
+        //Send email
+        $("#send-results").click(function() {
+            var email = $("#send-results-email").val();
+            //Make sure its a valid email
+            if(isValidEmailAddress(email)) {
+                $("#email-results-error").html(""); //clear old errors
+                $("#email-results-success").html("");
+
+                //IMPORTANT!!!!!!!
+                //IMPORTANT!!!!!!!
+                // Add your own service to emailjs.com and replace anna_outlook
+                // emailjs.send("service id","template id",{placeholderName: value, costPerHire: costPerHire});
+                emailjs.send("anna_outlook","calc",{total: total, costPerHire: costPerHire, email: email})
+                .then(function(response){
+                    $("#email-results-success").html("Email Sent!");
+                }, function(error) {
+                    $("#email-results-error").html("Something went wrong. Please try again.");
+                })
+
+            } else {
+                $("#email-results-error").html("Invalid email");
+            }
+        });
+    </script>
+    <!-- end logic -->
+</body>
