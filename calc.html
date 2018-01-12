@@ -2,19 +2,19 @@
         <style>
             /* css for the calc. copy and paste in to website <head> or add to css file */
             .calc-container {
-                max-width: 700px;
+                max-width: 500px;
                 margin: auto;
                 padding: 20px;
-                background: pink; /* todo: remove. */
             }
 
             .calc-container label{
                 width: 300px;
+                margin-bottom: 10px;
                 display: inline-block;
             }
 
             .calc-container input, .currency-input {
-                max-width: 395px; /* can probably be much smaller */
+                max-width: 195px; /* can probably be much smaller */
                 width: 100%;
                 display: inline-block;
                 box-sizing: border-box;
@@ -23,11 +23,43 @@
             /* make the $ look like its in the input */
             .currency-input {
                 border: 1px inset #ccc;
+                padding-left: 5px;
                 background: white;
             }
             .currency-input input {
                 border: 0;
-                max-width: 300px;
+                max-width: 180px;
+            }
+
+            .currency-input input:focus {
+                outline: none;
+            }
+
+            .currency-input:focus-within {
+                /* make look like an input when focused; */
+                outline: -webkit-focus-ring-color auto 5px;
+                outline-offset: -2px;
+            }
+
+            .calc-subsection {
+                width: 85%;
+                margin-left: 15%;
+            }
+
+            .calc-subsection label {
+                width: calc(.85 * 300px);
+            }
+            .calc-subsection input, .calc-subsection .currency-input {
+               max-width: calc(.85 * 195px - 5px);
+            }
+
+            .calc-subsection .currency-input input{
+                max-width: calc(.85 * 175px - 5px);
+            }
+
+            .help-text {
+                font-size: 11px;
+                color: gray;
             }
         </style>
         <!-- copy/paste in to <head> -->
@@ -73,6 +105,7 @@
                         $<input class="cost timeframe" id="bonuses" name="bonuses" type="number" min="0.01" step="0.01"/>
                     </span>
 
+                    <br/><br/>
                     <label>Interview Costs during timeframe</label>
                     <div class="calc-subsection">
                         <label for="costs-hours">Number of hours</label>
